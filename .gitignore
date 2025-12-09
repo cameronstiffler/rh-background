@@ -1,0 +1,23 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments and local config
+.venv/
+.env
+.DS_Store
+
+# Generated outputs
+output/
+gen_background/
+png/
+misc/
+
+# Large/local assets (kept out of git)
+test_assets/
+ref_background/
+
+# Editor settings
+.idea/
+.vscode/

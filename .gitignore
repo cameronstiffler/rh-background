@@ -9,7 +9,6 @@ __pycache__/
 .DS_Store
 
 # Generated outputs
-output/
 gen_background/
 png/
 misc/

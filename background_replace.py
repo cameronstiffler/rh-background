@@ -46,7 +46,7 @@ Rules:
 - Keep the product scale and camera perspective consistent with the asset photo.
 - Use only the provided background; do not invent extra props or text.
 - Preserve realistic lighting, reflections, and shadows; keep clean edges and soft natural shadows.
-- Maintain glass transparency: do not fill clear glass; keep background visible through glass while preserving reflections."""
+- Maintain clear glass transparency: keep the background visible through glass, retain specular highlights and light sources, avoid frosting/gray fill or added haze."""
 
 
 def parse_args() -> argparse.Namespace:

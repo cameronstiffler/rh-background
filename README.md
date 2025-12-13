@@ -30,7 +30,8 @@ Useful flags:
 - `--limit 2` processes only the first two assets.
 - `--prompt-file custom_prompt.txt` swaps in your own instructions.
 - `--model models/gemini-3-pro-image-preview` overrides the model if you change it later (defaults to `GEMINI_MODEL` in `.env`).
-- `--max-side 4096` controls downscaling before upload (0 disables; default 4096).
+- `--resolution 4K` (or `2K`/`1K`) sets the long edge for both upload and output; overrides `--max-side`. Defaults to `4K` (set `RESOLUTION` in `.env` to change).
+- `--max-side 4096` controls downscaling before upload (0 disables; default 4096). Overridden by `--resolution`.
 
 Each generated file is saved as `<product>.png` in the output folder. If a product folder has no `.tif` asset or matching reference background, the script will skip it and print a note.
 

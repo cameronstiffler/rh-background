@@ -28,6 +28,7 @@ OUTPUT_ROOT = Path("output")
 ASSET_PREFERRED_EXTENSIONS = {".tif", ".tiff"}
 ASSET_FALLBACK_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 BACKGROUND_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"}
+RESOLUTION_MAP = {"1K": 1024, "2K": 2048, "4K": 4096}
 
 DEFAULT_SAFETY_SETTINGS = [
     {"category": cat, "threshold": "BLOCK_NONE"}
@@ -46,10 +47,17 @@ Rules:
 - Keep the product scale and camera perspective consistent with the asset photo.
 - Use only the provided background; do not invent extra props or text.
 - Preserve realistic lighting, reflections, and shadows; keep clean edges and soft natural shadows.
-- Maintain clear glass transparency: keep the background visible through glass, retain specular highlights and light sources, avoid frosting/gray fill or added haze."""
+- Maintain clear glass transparency: keep the background clearly visible through glass, retain specular highlights and light sources, and avoid tinting, frosting, gray fill, or added haze; glass should read as clear, not smoky."""
 
 
 def parse_args() -> argparse.Namespace:
+    env_resolution = os.getenv("RESOLUTION")
+    resolution_default = (
+        env_resolution.strip().upper() if env_resolution else "4K"
+    )
+    if resolution_default not in RESOLUTION_MAP:
+        resolution_default = "4K"
+
     parser = argparse.ArgumentParser(
         description="Generate background replacements with the Gemini 3 API."
     )
@@ -72,7 +80,7 @@ def parse_args() -> argparse.Namespace:
         "--max-side",
         type=int,
         default=int(os.getenv("MAX_SIDE", "4096")),
-        help="Max long-edge pixels sent to Gemini (0 to disable; default 4096).",
+        help="Max long-edge pixels sent to Gemini (0 to disable; default 4096). Overridden by --resolution.",
     )
     parser.add_argument(
         "--model",
@@ -96,6 +104,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=OUTPUT_ROOT,
         help="Output directory for generated images.",
+    )
+    parser.add_argument(
+        "--resolution",
+        choices=sorted(RESOLUTION_MAP.keys()),
+        default=resolution_default,
+        help="Target long-edge resolution for both request inputs and final output (overrides --max-side).",
     )
     parser.add_argument(
         "--dry-run",
@@ -188,6 +202,22 @@ def to_png_bytes(image_path: Path, max_side: int) -> bytes:
 def image_part_from_bytes(data: bytes) -> dict:
     encoded = base64.b64encode(data).decode("ascii")
     return {"inline_data": {"mime_type": "image/png", "data": encoded}}
+
+
+def resize_output_if_needed(image_bytes: bytes, max_side: int) -> bytes:
+    if max_side <= 0:
+        return image_bytes
+    with Image.open(io.BytesIO(image_bytes)) as im:
+        width, height = im.size
+        longest = max(width, height)
+        if longest == max_side:
+            return image_bytes
+        scale = max_side / float(longest)
+        new_size = (max(1, int(width * scale)), max(1, int(height * scale)))
+        resized = im.resize(new_size, resample=Image.LANCZOS)
+        buffer = io.BytesIO()
+        resized.save(buffer, format=im.format or "PNG")
+        return buffer.getvalue()
 
 
 def normalize_inline_data(data) -> bytes:
@@ -302,6 +332,13 @@ def main() -> None:
             )
         return
 
+    input_max_side = args.max_side
+    output_max_side = args.max_side
+    if args.resolution:
+        target_side = RESOLUTION_MAP[args.resolution]
+        input_max_side = target_side
+        output_max_side = target_side
+
     for product_name, asset_path, background_path, shadow_path in work_items:
         print(
             f"[gemini] {product_name}: {asset_path.name} with {background_path.name} (shadow: disabled)"
@@ -309,11 +346,11 @@ def main() -> None:
         out_dir = args.output / product_name
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        asset_png = to_png_bytes(asset_path, args.max_side)
+        asset_png = to_png_bytes(asset_path, input_max_side)
         asset_png_path = out_dir / "asset.png"
         asset_png_path.write_bytes(asset_png)
 
-        background_png = to_png_bytes(background_path, args.max_side)
+        background_png = to_png_bytes(background_path, input_max_side)
         shadow_png = None  # Shadows disabled currently
 
         try:
@@ -332,6 +369,7 @@ def main() -> None:
             print(f"  ✖ Failed: {exc}", file=sys.stderr)
             continue
 
+        output_bytes = resize_output_if_needed(output_bytes, output_max_side)
         out_name = f"{product_name}.png"
         out_path = out_dir / out_name
         out_path.write_bytes(output_bytes)

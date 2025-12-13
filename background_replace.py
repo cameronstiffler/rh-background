@@ -45,7 +45,8 @@ DEFAULT_PROMPT = """You are a senior photo retoucher. Extract the product from t
 Rules:
 - Keep the product scale and camera perspective consistent with the asset photo.
 - Use only the provided background; do not invent extra props or text.
-- Preserve realistic lighting, reflections, and shadows; keep clean edges and soft natural shadows."""
+- Preserve realistic lighting, reflections, and shadows; keep clean edges and soft natural shadows.
+- Maintain glass transparency: do not fill clear glass; keep background visible through glass while preserving reflections."""
 
 
 def parse_args() -> argparse.Namespace:

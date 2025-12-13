@@ -15,7 +15,7 @@ Simple helper to send product shots and reference backgrounds to the Gemini 3 AP
 
 ## Running
 For each product folder:
-- Source asset: the first `.tif/.tiff` in `test_assets/<product>/` (converted to `asset.png`).
+- Source asset: the first `.tif/.tiff` in `test_assets/<product>/` (converted to `asset.png`); if no TIFF is present, the first other image (`.png/.jpg/.jpeg/.webp/.bmp`) is used.
 - Background: the first image in `ref_background/<product>/` (any common image type).
 - Shadow reference: currently ignored (shadows disabled).
 - Output: saved to `output/<product>/<product>.png` (and the converted `asset.png` for reference).

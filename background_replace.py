@@ -25,6 +25,10 @@ ASSETS_ROOT = Path("test_assets")
 BACKGROUND_ROOT = Path("ref_background")
 OUTPUT_ROOT = Path("output")
 
+ASSET_PREFERRED_EXTENSIONS = {".tif", ".tiff"}
+ASSET_FALLBACK_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
+BACKGROUND_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"}
+
 DEFAULT_SAFETY_SETTINGS = [
     {"category": cat, "threshold": "BLOCK_NONE"}
     for cat in [
@@ -132,6 +136,13 @@ def first_image(folder: Path, extensions: set[str]) -> Optional[Path]:
     return None
 
 
+def select_asset_image(product_dir: Path) -> Optional[Path]:
+    preferred = first_image(product_dir, ASSET_PREFERRED_EXTENSIONS)
+    if preferred:
+        return preferred
+    return first_image(product_dir, ASSET_FALLBACK_EXTENSIONS)
+
+
 def discover_work(
     product_filter: Optional[str],
 ) -> Iterator[Tuple[str, Path, Path, Optional[Path]]]:
@@ -141,15 +152,18 @@ def discover_work(
         if product_filter and product_dir.name != product_filter:
             continue
 
-        target_path = first_image(product_dir, {".tif", ".tiff"})
+        target_path = select_asset_image(product_dir)
         if not target_path:
-            print(f"[skip] No .tif asset found for {product_dir.name}", file=sys.stderr)
+            print(f"[skip] No image asset found for {product_dir.name}", file=sys.stderr)
             continue
+        if target_path.suffix.lower() not in ASSET_PREFERRED_EXTENSIONS:
+            print(
+                f"[info] Using non-TIF asset for {product_dir.name}: {target_path.name}",
+                file=sys.stderr,
+            )
 
         ref_dir = BACKGROUND_ROOT / product_dir.name
-        background_path = first_image(
-            ref_dir, {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"}
-        )
+        background_path = first_image(ref_dir, BACKGROUND_EXTENSIONS)
         if not background_path:
             print(f"[skip] No background reference for {product_dir.name}", file=sys.stderr)
             continue

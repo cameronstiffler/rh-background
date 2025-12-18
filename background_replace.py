@@ -207,6 +207,15 @@ def ensure_model_path(model: str) -> str:
     return model if model.startswith("models/") else f"models/{model}"
 
 
+def format_bytes(num_bytes: int) -> str:
+    value = float(num_bytes)
+    for unit in ("B", "KB", "MB", "GB"):
+        if value < 1024 or unit == "GB":
+            return f"{value:.0f} {unit}" if unit == "B" else f"{value:.2f} {unit}"
+        value /= 1024
+    return f"{value:.2f} GB"
+
+
 def resize_if_needed(img: Image.Image, max_side: int) -> Image.Image:
     """Downscale image to max_side on the longest edge to keep payload reasonable."""
     if max_side <= 0:
@@ -257,9 +266,10 @@ def find_object_reference_images(product_name: str) -> list[Path]:
 def log_image_submission(label: str, path: Path, meta: dict) -> None:
     src_w, src_h = meta["original_size"]
     final_w, final_h = meta["final_size"]
+    payload_size = format_bytes(meta.get("payload_bytes", 0))
     print(
         f"    {label}: {path} -> {final_w}x{final_h}px PNG "
-        f"(source {src_w}x{src_h} {meta['original_format']}/{meta['original_mode']})"
+        f"(upload ~{payload_size}; source {src_w}x{src_h} {meta['original_format']}/{meta['original_mode']})"
     )
 
 
@@ -307,13 +317,15 @@ def to_png_bytes_with_meta(image_path: Path, max_side: int) -> tuple[bytes, dict
         final_size = converted.size
         buffer = io.BytesIO()
         converted.save(buffer, format="PNG")
-        return buffer.getvalue(), {
+        data = buffer.getvalue()
+        return data, {
             "original_size": original_size,
             "final_size": final_size,
             "original_mode": original_mode,
             "final_mode": converted.mode,
             "original_format": original_format,
             "mime": "image/png",
+            "payload_bytes": len(data),
         }
 
 

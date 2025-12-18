@@ -47,7 +47,8 @@ BACKGROUND_ROOT = Path("ref_background")
 OUTPUT_ROOT = Path("output")
 OBJECT_REFERENCE_ROOT = Path("ref_objects")
 ASSET_DUMP_ROOT = Path("png")
-DEFAULT_PROMPT_PATH = Path("prompts/default_prompt_PID0.md")
+PROMPTS_ROOT = Path("prompts")
+DEFAULT_PROMPT_PATH = PROMPTS_ROOT / "default_prompt_PID0.md"
 
 ASSET_PREFERRED_EXTENSIONS = {".tif", ".tiff"}
 ASSET_FALLBACK_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
@@ -117,6 +118,11 @@ def parse_args() -> argparse.Namespace:
         "--prompt-file",
         type=Path,
         help="Optional text file to override the default prompt.",
+    )
+    parser.add_argument(
+        "--pid",
+        type=positive_int,
+        help="Select prompt by PID number (looks for prompts/*PID#.md). Cannot be used with --prompt-file.",
     )
     parser.add_argument(
         "--max-side",
@@ -207,6 +213,16 @@ def prompt_id_from_path(path: Path) -> str:
     if match:
         return match.group(1).upper()
     return "PIDX"
+
+
+def find_prompt_by_pid(pid: int) -> Path:
+    if not PROMPTS_ROOT.exists():
+        raise FileNotFoundError(f"Prompts folder missing at {PROMPTS_ROOT}")
+    pid_token = f"pid{pid}".lower()
+    for candidate in sorted(PROMPTS_ROOT.glob("*.md")):
+        if pid_token in candidate.stem.lower():
+            return candidate
+    raise FileNotFoundError(f"No prompt file found for PID{pid} in {PROMPTS_ROOT}")
 
 def glass_opacity_value(raw: str) -> float:
     try:
@@ -574,7 +590,19 @@ def main() -> None:
         print("No matching product shots found to process.", file=sys.stderr)
         return
 
-    prompt_path = args.prompt_file or DEFAULT_PROMPT_PATH
+    if args.pid is not None and args.prompt_file:
+        print("Cannot use --pid together with --prompt-file. Pick one.", file=sys.stderr)
+        sys.exit(1)
+
+    if args.pid is not None:
+        try:
+            prompt_path = find_prompt_by_pid(args.pid)
+        except FileNotFoundError as exc:
+            print(str(exc), file=sys.stderr)
+            sys.exit(1)
+    else:
+        prompt_path = args.prompt_file or DEFAULT_PROMPT_PATH
+
     prompt = load_prompt(prompt_path)
     prompt_id = prompt_id_from_path(prompt_path)
     if args.glass_opacity is not None:

@@ -19,11 +19,15 @@ For each product folder:
 - Source asset: the first `.tif/.tiff` in `test_assets/<product>/` (converted to `asset.png` stored in `png/<product>/` for reference); if no TIFF is present, the first other image (`.png/.jpg/.jpeg/.webp/.bmp`) is used.
 - Background: the first image in `ref_background/<product>/` (any common image type).
 - Shadow reference: currently ignored (shadows disabled).
+- Reference images: ref_objects/<product>/<anyname>.(`.png/.jpg/.jpeg/.webp/.bmp`)
 - Output: saved to `output/<product>/<product>.png`; the converted asset copy lives in `png/<product>/asset.png`.
 
 Example run for the chandelier assets:
 ```bash
 python background_replace.py --product "Glass Globe Chandelier"
+```
+```bash
+python python3 background_replace.py --product "Glass Globe Chandelier" --prompt-file alternate_prompt_2.md --results 3
 ```
 
 Useful flags:

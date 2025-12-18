@@ -13,11 +13,15 @@ gen_background/
 png/
 misc/
 junk/
+saved_output/
+old prompts/
+output/Bella Sofa
 
 # Large/local assets (kept out of git)
-test_assets/
-ref_background/
-ref_objects/
+test_assets/Bella Sofa/
+ref_background/Bella Sofa/
+ref_objects/Bella Sofa/
+ref_shadows/
 
 # Editor settings
 .idea/

@@ -1,7 +1,0 @@
-You are a senior photo retoucher. Use the provided product asset image as the Base Image and the provided background image as the Background Reference. Precisely extract the full product from the Base Image and place it into the Background Reference environment. If any sofa or other furniture exists in the background, remove it completely and replace it with the extracted product so that only one product is visible.
-
-Match the product’s original scale, proportions, and camera perspective exactly as seen in the Base Image. Preserve the product’s identity, color, texture, stitching, materials, and fine details without alteration. Do not crop the product; the entire product must remain fully visible.
-
-Lighting should primarily follow the Base Image. Harmonize exposure, color temperature, and white balance with the background only enough to appear natural. Do not add cast shadows or contact shadows.
-
-Use only the provided background. Do not add props, text, logos, or decorative elements. Ensure clean edges with no halos, cutout artifacts, seams, or duplicated furniture. When additional reference images are provided, match material qualities such as gloss, transparency, reflectivity, and luminosity exactly. Output a single final image at the same aspect ratio and resolution as the Base Image.

@@ -26,7 +26,7 @@ BACKGROUND_ROOT = Path("ref_background")
 OUTPUT_ROOT = Path("output")
 OBJECT_REFERENCE_ROOT = Path("ref_objects")
 ASSET_DUMP_ROOT = Path("png")
-DEFAULT_PROMPT_PATH = Path("default_prompt.txt")
+DEFAULT_PROMPT_PATH = Path("default_prompt.md")
 
 ASSET_PREFERRED_EXTENSIONS = {".tif", ".tiff"}
 ASSET_FALLBACK_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}

@@ -12,10 +12,12 @@ __pycache__/
 gen_background/
 png/
 misc/
+junk/
 
 # Large/local assets (kept out of git)
 test_assets/
 ref_background/
+ref_objects/
 
 # Editor settings
 .idea/

@@ -11,8 +11,8 @@ Simple helper to send product shots and reference backgrounds to the Gemini 3 AP
   source .venv/bin/activate
   pip install -r requirements.txt
   ```
-- Drop your local assets into `test_assets/<product>/`, matching backgrounds into `ref_background/<product>/`, and any extra product-only photos into `ref_objects/<product>/`. These folders are `.gitignore`d to keep large image files out of git.
-- The default instructions live in `default_prompt.txt`; edit that file to change the baseline prompt, or provide your own via `--prompt-file`.
+- Drop your local assets into `test_assets/<product>/`, matching backgrounds into `ref_background/<product>/`, and any extra product-only photos into `ref_objects/<product>/` (one subfolder per product, same name as in `test_assets/`). These folders are `.gitignore`d to keep large image files out of git.
+- The default instructions live in `default_prompt.md`; edit that file to change the baseline prompt, or provide your own via `--prompt-file`.
 
 ## Running
 For each product folder:
@@ -29,13 +29,13 @@ python background_replace.py --product "Glass Globe Chandelier"
 Useful flags:
 - `--dry-run` shows which files would be sent without calling Gemini.
 - `--limit 2` processes only the first two assets.
-- `--prompt-file custom_prompt.txt` swaps in your own instructions (default comes from `default_prompt.txt`).
+- `--prompt-file custom_prompt.md` swaps in your own instructions (default comes from `default_prompt.md`).
 - `--model models/gemini-3-pro-image-preview` overrides the model if you change it later (defaults to `GEMINI_MODEL` in `.env`).
 - `--temperature 0.25` controls randomness; defaults to `GEMINI_TEMPERATURE` / `TEMPERATURE` in `.env` when set.
 - `--seed 123` accepted for forward-compatibility (or set `GEMINI_SEED` / `SEED` in `.env`), but currently ignored because Gemini generation_config does not support seeds.
 - `--resolution 4K` (or `2K`/`1K`) sets the long edge for both upload and output; overrides `--max-side`. Defaults to `4K` (set `RESOLUTION` in `.env` to change).
 - `--max-side 4096` controls downscaling before upload (0 disables; default 4096). Overridden by `--resolution`.
-- `--max-object-refs 4` limits how many photos from `ref_objects/<product>/` are sent with each request (0 disables). These optional images help Gemini match transparency, reflectivity, and fine material details of the product.
+- `--max-object-refs 4` limits how many photos from `ref_objects/<product>/` are sent with each request (0 disables). Place these under `ref_objects/<product>/` (matching the product folder name in `test_assets/`); they help Gemini match transparency, reflectivity, and fine material details of the product.
 - `--glass-opacity 0.35` optionally appends a glass-opacity hint (0.0 fully transparent to 1.0 fully opaque) so Gemini renders glass with the specified transparency.
 - `--results 3` requests multiple outputs per product; files are saved as `<product>.png` when requesting 1 result, otherwise `<product>_1.png`, `<product>_2.png`, etc.
 

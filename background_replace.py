@@ -29,6 +29,7 @@ import argparse
 import base64
 import io
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Iterator, Optional
@@ -46,7 +47,7 @@ BACKGROUND_ROOT = Path("ref_background")
 OUTPUT_ROOT = Path("output")
 OBJECT_REFERENCE_ROOT = Path("ref_objects")
 ASSET_DUMP_ROOT = Path("png")
-DEFAULT_PROMPT_PATH = Path("default_prompt.md")
+DEFAULT_PROMPT_PATH = Path("prompts/default_prompt_PID0.md")
 
 ASSET_PREFERRED_EXTENSIONS = {".tif", ".tiff"}
 ASSET_FALLBACK_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
@@ -199,6 +200,13 @@ def load_prompt(prompt_file: Optional[Path]) -> str:
             raise
         print(f"[warn] Default prompt file missing at {path}; using built-in fallback.", file=sys.stderr)
         return DEFAULT_PROMPT_FALLBACK
+
+
+def prompt_id_from_path(path: Path) -> str:
+    match = re.search(r"(pid\d+)", path.stem, flags=re.IGNORECASE)
+    if match:
+        return match.group(1).upper()
+    return "PIDX"
 
 def glass_opacity_value(raw: str) -> float:
     try:
@@ -566,7 +574,9 @@ def main() -> None:
         print("No matching product shots found to process.", file=sys.stderr)
         return
 
-    prompt = load_prompt(args.prompt_file)
+    prompt_path = args.prompt_file or DEFAULT_PROMPT_PATH
+    prompt = load_prompt(prompt_path)
+    prompt_id = prompt_id_from_path(prompt_path)
     if args.glass_opacity is not None:
         prompt += (
             "\nGlass opacity reference: match the real object's glass opacity at "
@@ -617,7 +627,7 @@ def main() -> None:
         )
         print(
             f"[genai] {product_name}: {asset_path.name} with {background_path.name} "
-            f"({len(object_ref_paths)} object refs, shadow: disabled{opacity_note}, results={results_count})"
+            f"(prompt {prompt_id}; {len(object_ref_paths)} object refs, shadow: disabled{opacity_note}, results={results_count})"
         )
         out_dir = args.output / product_name
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -625,9 +635,10 @@ def main() -> None:
         asset_dump_dir.mkdir(parents=True, exist_ok=True)
 
         run_targets = []
+        base_out_name = f"{product_name}_{prompt_id}"
         for run_idx in range(results_count):
             out_name = (
-                f"{product_name}.png" if results_count == 1 else f"{product_name}_{run_idx + 1}.png"
+                f"{base_out_name}.png" if results_count == 1 else f"{base_out_name}_{run_idx + 1}.png"
             )
             out_path = out_dir / out_name
             if out_path.exists():

@@ -12,7 +12,7 @@ Simple helper to send product shots and reference backgrounds to the Gemini 3 AP
   pip install -r requirements.txt
   ```
 - Drop your local assets into `test_assets/<product>/`, matching backgrounds into `ref_background/<product>/`, and any extra product-only photos into `ref_objects/<product>/` (one subfolder per product, same name as in `test_assets/`). These folders are `.gitignore`d to keep large image files out of git.
-- The default instructions live in `default_prompt.md`; edit that file to change the baseline prompt, or provide your own via `--prompt-file`.
+- The default instructions live in `prompts/default_prompt_PID0.md`; edit that file to change the baseline prompt, or provide your own via `--prompt-file`.
 
 ## Running
 For each product folder:
@@ -33,7 +33,7 @@ python python3 background_replace.py --product "Glass Globe Chandelier" --prompt
 Useful flags:
 - `--dry-run` shows which files would be sent without calling Gemini.
 - `--limit 2` processes only the first two assets.
-- `--prompt-file custom_prompt.md` swaps in your own instructions (default comes from `default_prompt.md`).
+- `--prompt-file prompts/custom_prompt_PID#.md` swaps in your own instructions (default comes from `prompts/default_prompt_PID0.md`). Output filenames include the `PID#` suffix to record which prompt was used.
 - `--model models/gemini-3-pro-image-preview` overrides the model if you change it later (defaults to `GEMINI_MODEL` in `.env`).
 - `--temperature 0.25` controls randomness; defaults to `GEMINI_TEMPERATURE` / `TEMPERATURE` in `.env` when set.
 - `--seed 123` accepted for forward-compatibility (or set `GEMINI_SEED` / `SEED` in `.env`), but currently ignored because Gemini generation_config does not support seeds.

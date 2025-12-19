@@ -20,7 +20,7 @@ For each product folder:
 - Background: the first image in `ref_background/<product>/` (any common image type).
 - Shadow reference: currently ignored (shadows disabled).
 - Reference images: ref_objects/<product>/<anyname>.(`.png/.jpg/.jpeg/.webp/.bmp`)
-- Output: saved to `output/<product>/<product>.png`; the converted asset copy lives in `png/<product>/asset.png`.
+- Output: saved to `output/<product>/<product>_PID#_MOD-XXXX_R#.png` (PID comes from the prompt filename; model tag is `MOD-G3PIP` for public Gemini or `MOD-VERTEX` for Vertex AI); the converted asset copy lives in `png/<product>/asset.png`.
 
 Example run for the chandelier assets:
 ```bash
@@ -34,7 +34,7 @@ Useful flags:
 - `--dry-run` shows which files would be sent without calling Gemini.
 - `--limit 2` processes only the first two assets.
 - `--pid 2` selects the prompt file whose name contains `PID2` under `prompts/` (e.g., `prompts/alternate_prompt_PID2.md`). `--prompt-file` and `--pid` are mutually exclusive. Output filenames include the `PID#` suffix to record which prompt was used.
-- `--prompt-file prompts/custom_prompt_PID#.md` swaps in your own instructions (default comes from `prompts/default_prompt_PID0.md`). Output filenames include the `PID#` suffix to record which prompt was used.
+- `--prompt-file prompts/custom_prompt_PID#.md` swaps in your own instructions (default comes from `prompts/default_prompt_PID0.md`). Output filenames include the `PID#`, model tag (`MOD-G3PIP` vs `MOD-VERTEX`), and result number (`R1`, `R2`, ...).
 - `--model models/gemini-3-pro-image-preview` overrides the model if you change it later (defaults to `GEMINI_MODEL` in `.env`).
 - `--temperature 0.25` controls randomness; defaults to `GEMINI_TEMPERATURE` / `TEMPERATURE` in `.env` when set.
 - `--seed 123` accepted for forward-compatibility (or set `GEMINI_SEED` / `SEED` in `.env`), but currently ignored because Gemini generation_config does not support seeds.

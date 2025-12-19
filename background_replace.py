@@ -463,7 +463,7 @@ def _create_client() -> genai.Client:
     """Create a Google Gen AI client for Vertex AI or public Gemini API.
     Controlled by GOOGLE_GENAI_USE_VERTEXAI (default true).
     """
-    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() != "false"
+    use_vertex = use_vertex_backend()
     if use_vertex:
         project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
         location = os.environ.get("GOOGLE_CLOUD_LOCATION", "global")
@@ -488,6 +488,10 @@ def normalize_model_id(model: str, use_vertex: bool) -> str:
         # Public API expects models/... style
         return model if model.startswith("models/") else f"models/{model}"
 
+
+def use_vertex_backend() -> bool:
+    return os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() != "false"
+
 # --- Model call ---
 
 def call_gemini(
@@ -509,7 +513,7 @@ def call_gemini(
     if client is None:
         raise RuntimeError("Gen AI client not initialized.")
 
-    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() != "false"
+    use_vertex = use_vertex_backend()
     model_id = normalize_model_id(model_name, use_vertex)
 
     # NOTE: Seed is not currently supported in GenerateContentConfig; we print a note only.
@@ -583,6 +587,9 @@ def main() -> None:
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
+    use_vertex = use_vertex_backend()
+    model_tag = "MOD-VERTEX" if use_vertex else "MOD-G3PIP"
+
     work_items = list(discover_work(args.product))
     if args.limit:
         work_items = work_items[: args.limit]
@@ -655,7 +662,7 @@ def main() -> None:
         )
         print(
             f"[genai] {product_name}: {asset_path.name} with {background_path.name} "
-            f"(prompt {prompt_id}; {len(object_ref_paths)} object refs, shadow: disabled{opacity_note}, results={results_count})"
+            f"(prompt {prompt_id}, model {model_tag}; {len(object_ref_paths)} object refs, shadow: disabled{opacity_note}, results={results_count})"
         )
         out_dir = args.output / product_name
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -663,11 +670,9 @@ def main() -> None:
         asset_dump_dir.mkdir(parents=True, exist_ok=True)
 
         run_targets = []
-        base_out_name = f"{product_name}_{prompt_id}"
+        base_out_name = f"{product_name}_{prompt_id}_{model_tag}"
         for run_idx in range(results_count):
-            out_name = (
-                f"{base_out_name}.png" if results_count == 1 else f"{base_out_name}_{run_idx + 1}.png"
-            )
+            out_name = f"{base_out_name}_R{run_idx + 1}.png"
             out_path = out_dir / out_name
             if out_path.exists():
                 print(f" ↷ Skip result {run_idx + 1}/{results_count}: {out_path} already exists")

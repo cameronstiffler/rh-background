@@ -55,7 +55,7 @@ ASSET_FALLBACK_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 BACKGROUND_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"}
 OBJECT_REFERENCE_EXTENSIONS = BACKGROUND_EXTENSIONS
 
-RESOLUTION_MAP = {"1K": 1024, "2K": 2048, "4K": 4096}
+RESOLUTION_MAP = {"1K": 1024, "2K": 2048, "4K": 4096, "6K": 6144, "8K": 8192}
 DEFAULT_MAX_OBJECT_REFS = 4
 
 MODEL_ID = "gemini-3-pro-image-preview"

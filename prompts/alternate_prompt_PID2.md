@@ -10,7 +10,7 @@ INPUT IMAGES:
 
 REQUIREMENTS:
 - The product must retain the exact proportions, silhouette, and structure from Image 1.
-- The entire product must be visible and contaied within the edges of the output image
+- The entire product must be visible and contained within the edges of the output image
 - The output background must match the background reference image exactly.
 - The product must be centered, vertically aligned, and naturally placed within the background from Image 2.
 - The product must NOT cast shadows onto the background in the output image.

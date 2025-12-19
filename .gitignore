@@ -26,3 +26,4 @@ ref_shadows/
 # Editor settings
 .idea/
 .vscode/
+vertex.json

@@ -95,6 +95,9 @@ def parse_args() -> argparse.Namespace:
     if resolution_default not in RESOLUTION_MAP:
         resolution_default = "4K"
 
+    env_aspect_ratio = os.getenv("ASPECT_RATIO", "").strip()
+    aspect_ratio_default = env_aspect_ratio if re.match(r"^\d+:\d+$", env_aspect_ratio) else "1:1"
+
     env_temp_raw = os.getenv("GEMINI_TEMPERATURE", os.getenv("TEMPERATURE"))
     try:
         env_temp_val = float(env_temp_raw) if env_temp_raw is not None else 0.25
@@ -171,6 +174,13 @@ def parse_args() -> argparse.Namespace:
         help="Target long-edge resolution for inputs and final output (overrides --max-side).",
     )
     parser.add_argument(
+        "--aspect-ratio", "--ar",
+        dest="aspect_ratio",
+        type=aspect_ratio_value,
+        default=aspect_ratio_default,
+        help="Aspect ratio hint for generation (format W:H, e.g., 1:1 or 16:9). Defaults to 1:1.",
+    )
+    parser.add_argument(
         "--glass-opacity", "--glass_opacity",
         dest="glass_opacity",
         type=glass_opacity_value,
@@ -240,6 +250,12 @@ def positive_int(raw: str) -> int:
         raise argparse.ArgumentTypeError("value must be an integer") from exc
     if value < 1:
         raise argparse.ArgumentTypeError("value must be >= 1")
+    return value
+
+def aspect_ratio_value(raw: str) -> str:
+    value = raw.strip()
+    if not re.match(r"^\d+:\d+$", value):
+        raise argparse.ArgumentTypeError("aspect ratio must be in W:H format, e.g., 1:1 or 16:9")
     return value
 
 # --- Image helpers ---
@@ -507,7 +523,7 @@ def call_gemini(
     timeout: int,
     seed: Optional[int],
     client: Optional[genai.Client] = None,
-    aspect_ratio: str = "16:9",
+    aspect_ratio: str = "1:1",
     image_size: str = "2K",
 ) -> bytes:
     if client is None:
@@ -707,7 +723,7 @@ def main() -> None:
 
         # Choose image_size from resolution
         image_size = args.resolution if args.resolution in RESOLUTION_MAP else "2K"
-        aspect_ratio = "16:9"  # default; adjust if needed
+        aspect_ratio = args.aspect_ratio
 
         for run_idx, out_path in run_targets:
             print(f" → Request {run_idx}/{results_count}")

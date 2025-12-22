@@ -28,7 +28,7 @@ Resolution: Generate at 4K resolution.
 
 Clarity: 8.0 megapixel equivalent or higher, ultra-sharp focus, and zero compression artifacts.
 
-Aspect Ratio: Match the exact aspect ratio of Image 1.
+Aspect Ratio: 1:1 (Square).
 
 Final Processing:
 

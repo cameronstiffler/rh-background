@@ -22,6 +22,12 @@ Resolution: Generate at 4K resolution with ultra-high clarity and sharp focus.
 
 Style: Clean, professional e-commerce catalog aesthetic. Photorealistic, 35mm lens quality, neutral and balanced color grading.
 
+Technical Quality: Resolution: Generate at 4K resolution.
+
+Clarity: 8.0 megapixel equivalent or higher, ultra-sharp focus, and zero compression artifacts.
+
+Aspect Ratio: Match the exact aspect ratio of Image 1.
+
 Final Processing:
 
 Perform a high-resolution pass to enhance fine details (crystals, wires, textures) while strictly preserving the original design and material integrity of the product.
